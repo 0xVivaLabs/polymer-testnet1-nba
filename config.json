@@ -1,8 +1,8 @@
 {
   "proofsEnabled": false,
   "deploy": {
-    "optimism": "XCounterUC",
-    "base": "XCounterUC"
+    "optimism": "BetNBA",
+    "base": "Reward"
   },
   "isUniversal": true,
   "createChannel": {
@@ -28,13 +28,13 @@
   },
   "sendUniversalPacket": {
     "optimism": {
-      "portAddr": "0x1234567890abcdef1234567890abcdef12345678",
-      "channelId": "channel-x",
+      "portAddr": "0x0772BD89350fA82Eb6dD099B325C1E5964F3EbFe",
+      "channelId": "channel-10",
       "timeout": 36000
     },
     "base": {
-      "portAddr": "0x1234567890abcdef1234567890abcdef12345678",
-      "channelId": "channel-y",
+      "portAddr": "0x6526f01F8760F00210208D0dfFA8d1762528D0ed",
+      "channelId": "channel-11",
       "timeout": 36000
     }
   },

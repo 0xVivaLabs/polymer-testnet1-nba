@@ -74,10 +74,10 @@ switch-client:
 # Usage: just do-it
 do-it:
     echo "Running the full E2E flow..."
-    just set-contracts optimism XCounter false && just set-contracts base XCounter false
+    just set-contracts optimism BetNBA true && just set-contracts base Reward true
     just deploy optimism base
     just sanity-check
-    just create-channel
+    # just create-channel
     just send-packet optimism
     echo "You've done it!"
 
