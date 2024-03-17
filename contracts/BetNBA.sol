@@ -2,10 +2,11 @@
 
 pragma solidity ^0.8.23;
 
-import "./base/UniversalChanIbcApp.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract BetNBA is Ownable, UniversalChanIbcApp {
+import "./base/CustomChanIbcApp.sol";
+
+contract BetNBA is Ownable, CustomChanIbcApp {
     struct Match {
         uint256 id;
         uint8 homeTeam; // 0-29
@@ -17,18 +18,17 @@ contract BetNBA is Ownable, UniversalChanIbcApp {
     mapping(uint256 => Match) public matchMap;
     mapping(address => mapping(uint256 => bool)) public userBets;
     mapping(uint256 => address) public betIdRecords;
+
+    // daily joined users and bet id list
     uint256[] public betIdList;
     address[] public joinedUsers;
 
-    event SendBetEvent(address indexed destPortAddr, address indexed bettor, uint256[] matches, bool[] homeWin);
-
     event AckBetConfirmed(address indexed bettor, uint256[] matches, bool[] homeWin);
 
-    constructor(address _middleware) UniversalChanIbcApp(_middleware) {}
+    constructor(IbcDispatcher _dispatcher) CustomChanIbcApp(_dispatcher) {}
 
     // ibc functions
-    function sendUniversalPacket(
-        address _destPortAddr,
+    function sendPacket(
         bytes32 _channelId,
         uint64 _timeoutSeconds,
         address _bettor,
@@ -38,25 +38,23 @@ contract BetNBA is Ownable, UniversalChanIbcApp {
         bytes memory payload = abi.encode(_bettor, _matches, _homeWin);
         uint64 timeoutTimestamp = uint64((block.timestamp + _timeoutSeconds) * 1000000000);
 
-        IbcUniversalPacketSender(mw).sendUniversalPacket(
-            _channelId, IbcUtils.toBytes32(_destPortAddr), payload, timeoutTimestamp
-        );
-        emit SendBetEvent(_destPortAddr, _bettor, _matches, _homeWin);
+        // logic
+        _bet(_bettor, _matches, _homeWin);
+
+        dispatcher.sendPacket(_channelId, payload, timeoutTimestamp);
     }
 
-    function onUniversalAcknowledgement(bytes32 channelId, UniversalPacket memory packet, AckPacket calldata ack)
+    function onAcknowledgementPacket(IbcPacket calldata packet, AckPacket calldata ack)
         external
         override
-        onlyIbcMw
+        onlyIbcDispatcher
     {
-        ackPackets.push(UcAckWithChannel(channelId, packet, ack));
+        ackPackets.push(ack);
 
         (address bettor, uint256[] memory matches, bool[] memory homeWin) =
-            abi.decode(packet.appData, (address, uint256[], bool[]));
+            abi.decode(packet.data, (address, uint256[], bool[]));
 
-        _bet(bettor, matches, homeWin);
-
-        emit AckBetConfirmed(IbcUtils.toAddress(packet.destPortAddr), matches, homeWin);
+        emit AckBetConfirmed(bettor, matches, homeWin);
     }
 
     // user can bet on matches
@@ -75,9 +73,9 @@ contract BetNBA is Ownable, UniversalChanIbcApp {
         joinedUsers.push(_bettor);
     }
 
-    function onTimeoutUniversalPacket(bytes32 channelId, UniversalPacket calldata packet) external override onlyIbcMw {
-        timeoutPackets.push(UcPacketWithChannel(channelId, packet));
-        // Timeouts not currently supported
+    function onTimeoutPacket(IbcPacket calldata packet) external override onlyIbcDispatcher {
+        timeoutPackets.push(packet);
+        // TODO reset bet timeout
     }
 
     // admin functions

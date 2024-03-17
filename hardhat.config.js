@@ -18,12 +18,20 @@ module.exports = {
     // for Base testnet
     base: {
       url: "https://sepolia.base.org",
-      accounts: [process.env.PRIVATE_KEY_1, process.env.PRIVATE_KEY_2],
+      accounts: [
+        process.env.PRIVATE_KEY_1,
+        process.env.PRIVATE_KEY_2,
+        process.env.PRIVATE_KEY_3,
+      ],
     },
     // for OP testnet
     optimism: {
       url: "https://sepolia.optimism.io",
-      accounts: [process.env.PRIVATE_KEY_1, process.env.PRIVATE_KEY_2],
+      accounts: [
+        process.env.PRIVATE_KEY_1,
+        process.env.PRIVATE_KEY_2,
+        process.env.PRIVATE_KEY_3,
+      ],
     },
   },
   defaultNetwork: "optimism",

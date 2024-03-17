@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-import "./base/UniversalChanIbcApp.sol";
+import "./base/CustomChanIbcApp.sol";
 
 // import "forge-std/console2.sol";
 
-contract Reward is ERC721, Ownable, UniversalChanIbcApp {
+contract Reward is ERC721, Ownable, CustomChanIbcApp {
     using Counters for Counters.Counter;
 
     Counters.Counter private currentTokenId;
@@ -36,7 +36,7 @@ contract Reward is ERC721, Ownable, UniversalChanIbcApp {
     //     _;
     // }
 
-    constructor(address _middleware) ERC721("NBAReward", "NBA") UniversalChanIbcApp(_middleware) {}
+    constructor(IbcDispatcher _dispatcher) ERC721("NBAReward", "NBA") CustomChanIbcApp(_dispatcher) {}
 
     event BetPlaced(address indexed user, uint256[] matchId, bool[] homeWin);
 
@@ -53,16 +53,16 @@ contract Reward is ERC721, Ownable, UniversalChanIbcApp {
     }
 
     // ibc functions
-    function onRecvUniversalPacket(bytes32 channelId, UniversalPacket calldata packet)
+    function onRecvPacket(IbcPacket memory packet)
         external
         override
-        onlyIbcMw
+        onlyIbcDispatcher
         returns (AckPacket memory ackPacket)
     {
-        recvedPackets.push(UcPacketWithChannel(channelId, packet));
+        recvedPackets.push(packet);
 
         (address _bettor, uint256[] memory _matchId, bool[] memory _homeWin) =
-            abi.decode(packet.appData, (address, uint256[], bool[]));
+            abi.decode(packet.data, (address, uint256[], bool[]));
 
         // Record the bet for compute winners
         for (uint256 i = 0; i < _matchId.length; i++) {
@@ -77,21 +77,20 @@ contract Reward is ERC721, Ownable, UniversalChanIbcApp {
         }
         joinedUsers.push(_bettor);
 
-        bytes memory ackData = abi.encode(_bettor, _matchId, _homeWin);
-        return AckPacket(true, ackData);
+        return AckPacket(true, abi.encode(_bettor, _matchId, _homeWin));
     }
 
-    function onUniversalAcknowledgement(bytes32, UniversalPacket memory, AckPacket calldata)
+    function onAcknowledgementPacket(IbcPacket calldata, AckPacket calldata ack)
         external
         view
         override
-        onlyIbcMw
+        onlyIbcDispatcher
     {
         require(false, "This function should not be called");
     }
 
-    function onTimeoutUniversalPacket(bytes32, UniversalPacket calldata) external view override onlyIbcMw {
-        require(false, "This function should not be called");
+    function onTimeoutPacket(IbcPacket calldata packet) external override onlyIbcDispatcher {
+        timeoutPackets.push(packet);
     }
 
     // function getBetIdListLength() public view returns (uint256) {

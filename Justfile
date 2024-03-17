@@ -55,6 +55,10 @@ create-channel:
     echo "Attempting to create a channel with the values from the config..."
     node scripts/private/_create-channel-config.js
 
+add-matches:
+    echo "Adding matches to the contract..."
+    npx hardhat run scripts/addMatches.js --network optimism
+
 # Send a packet over the universal channel or a custom channel as defined in the config.json file
 # The source argument is REQUIRED;
 # Usage: just send-packet [source]
@@ -74,10 +78,11 @@ switch-client:
 # Usage: just do-it
 do-it:
     echo "Running the full E2E flow..."
-    just set-contracts optimism BetNBA true && just set-contracts base Reward true
+    just set-contracts optimism BetNBA false && just set-contracts base Reward false
     just deploy optimism base
     just sanity-check
-    # just create-channel
+    just create-channel
+    just add-matches
     just send-packet optimism
     echo "You've done it!"
 

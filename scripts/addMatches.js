@@ -5,12 +5,12 @@ const axios = require("axios");
 async function main() {
   const [admin, user] = await ethers.getSigners();
   const config = require(getConfigPath());
-  const betNBAAddress = config.sendUniversalPacket.optimism.portAddr;
+  const betNBAAddress = config.sendPacket.optimism.portAddr;
 
   const BetNBA = await ethers.getContractFactory("BetNBA");
   const betNBA = BetNBA.attach(betNBAAddress);
 
-  const date = "2024-03-16";
+  const date = "2024-03-17";
 
   const res = await axios.get(
     `http://api.balldontlie.io/v1/games?dates[]=${date}`,
@@ -32,9 +32,14 @@ async function main() {
 
   if (games[0].home_team_score == 0) {
     try {
-      const resetTx = await betNBA.connect(admin).resetDailyMatchResults();
-      await resetTx.wait();
-      console.log(`Reset daily match participants`);
+      if (
+        ((await BetNBA.joinedUsers) && (await BetNBA.joinedUsers.length)) > 0 ||
+        ((await BetNBA.joinedUsers) && (await BetNBA.betIdList.length)) > 0
+      ) {
+        const resetTx = await betNBA.connect(admin).resetDailyMatchResults();
+        await resetTx.wait();
+        console.log(`Reset daily match participants`);
+      }
 
       const addMatchTx = await betNBA
         .connect(admin)

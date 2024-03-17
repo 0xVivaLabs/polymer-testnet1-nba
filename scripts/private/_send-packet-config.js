@@ -1,10 +1,10 @@
 const { exec } = require("child_process");
-const {getConfigPath, getWhitelistedNetworks} = require('./_helpers.js');
-const { setupIbcPacketEventListener } = require('./_events.js');
+const { getConfigPath, getWhitelistedNetworks } = require("./_helpers.js");
+const { setupIbcPacketEventListener } = require("./_events.js");
 
 const source = process.argv[2];
 if (!source) {
-  console.error('Usage: node send-packet-config.js <source_network>');
+  console.error("Usage: node send-packet-config.js <source_network>");
   process.exit(1);
 }
 
@@ -30,7 +30,8 @@ async function runSendPacket(config) {
     process.exit(1);
   }
 
-  const script = config.isUniversal ? 'send-universal-packet.js' : 'send-packet.js';
+  // const script = config.isUniversal ? 'send-universal-packet.js' : 'send-packet.js';
+  const script = "bet.js";
   const command = `npx hardhat run scripts/${script} --network ${source}`;
 
   try {
