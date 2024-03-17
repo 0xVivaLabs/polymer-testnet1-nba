@@ -81,6 +81,7 @@ contract BetNBA is Ownable, UniversalChanIbcApp {
     }
 
     // admin functions
+    // TODO rename function
     function resetDailyMatchResults() external onlyOwner {
         delete betIdList;
         delete joinedUsers;
