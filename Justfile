@@ -58,6 +58,7 @@ create-channel:
 add-matches:
     echo "Adding matches to the contract..."
     npx hardhat run scripts/addMatches.js --network optimism
+    npx hardhat run scripts/addMatchesOnBase.js --network base
 
 # Send a packet over the universal channel or a custom channel as defined in the config.json file
 # The source argument is REQUIRED;
