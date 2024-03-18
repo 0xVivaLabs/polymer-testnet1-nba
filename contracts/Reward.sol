@@ -64,6 +64,8 @@ contract Reward is ERC721, Ownable, CustomChanIbcApp {
         (address _bettor, uint256[] memory _matchId, bool[] memory _homeWin) =
             abi.decode(packet.data, (address, uint256[], bool[]));
 
+        emit BetPlaced(_bettor, _matchId, _homeWin);
+
         // Record the bet for compute winners
         for (uint256 i = 0; i < _matchId.length; i++) {
             require(matchMap[_matchId[i]].id != 0, "Match not found");

@@ -12,7 +12,7 @@ async function main() {
   const BetNBA = await ethers.getContractFactory("BetNBA");
   const betNBA = BetNBA.attach(betNBAAddress);
 
-  const date = "2024-03-17";
+  const date = "2024-03-18";
 
   const res = await axios.get(
     `http://api.balldontlie.io/v1/games?dates[]=${date}`,
