@@ -60,6 +60,10 @@ add-matches:
     npx hardhat run scripts/addMatches.js --network optimism
     npx hardhat run scripts/addMatchesOnBase.js --network base
 
+reward:
+    echo "Distributing rewards..."
+    npx hardhat run scripts/reward.js --network base
+
 # Send a packet over the universal channel or a custom channel as defined in the config.json file
 # The source argument is REQUIRED;
 # Usage: just send-packet [source]
